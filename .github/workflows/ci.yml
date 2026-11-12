@@ -32,7 +32,7 @@ jobs:
           uv run ruff format --check src/ bin/
 
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "TODO: implement test job"
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - run: echo "TODO: implement test job"
