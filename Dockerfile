@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED=1 \
     UV_NO_DEV=1 \
     UV_FROZEN=1 \
     PYTHONPATH=/app \
-    PATH="/root/.local/bin:/home/appuser/.local/bin:$PATH"
+    UV_NO_SYNC=1 \
+    PATH="/app/.venv/bin:$PATH"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl ca-certificates \
@@ -15,18 +16,20 @@ RUN apt-get update \
 
 WORKDIR /app
 
-RUN addgroup --system --gid 1000 appuser && \
-    adduser --system --uid 1000 --home /home/appuser --ingroup appuser appuser && \
-    chown -R appuser:appuser /app
-
-USER appuser
-
 COPY pyproject.toml uv.lock ./
 RUN pip install --no-cache-dir uv
 RUN uv sync --frozen --no-install-project --no-dev
 
-COPY . .
+COPY src/ src/
+COPY bin/ bin/
+COPY migrations/ migrations/
+COPY alembic.ini ./
+COPY run.sh ./
 
+RUN addgroup --system --gid 1000 appuser && \
+    adduser --system --uid 1000 --home /home/appuser --ingroup appuser appuser
+
+USER 1000:1000
 EXPOSE 8000
 
 CMD ["bash", "./run.sh"]
